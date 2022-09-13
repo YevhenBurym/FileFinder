@@ -1,0 +1,8 @@
+
+*.user*
+*.pro.user*
+*.autosave
+
+/.idea
+/doc/html
+/cmake-build-debug
