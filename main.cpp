@@ -6,7 +6,7 @@ int main(int argc, const char **argv) {
         dirPath = argv[1];
     }
     //findFileInDirectory("test.txt", dirPath);
-    findFile("test.txt");
+    findFileInSystem("test.txt",false);
     //fileFinder("test.txt", dirPath);
 
     return 0;

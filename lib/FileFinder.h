@@ -7,4 +7,4 @@ bool findFileInSubDir(const std::string& fileName, const std::filesystem::direct
 bool findFileInDir(const std::string& fileName, const std::filesystem::path& dirPath);
 void fileFinder(const std::string& fileName, std::filesystem::path& startDirPath);
 void findFileInDirectory(const std::string& fileName, std::filesystem::path& startDirPath);
-void findFile(const std::string& fileName);
+void findFileInSystem(const std::string& fileName, bool isFirstFound);

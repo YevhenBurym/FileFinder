@@ -111,12 +111,14 @@ void findFileInDirectory(const std::string &fileName, std::filesystem::path &sta
 //И проверка если это директория(не вышли за диск "z:\"),
 //То вызвать функцию findFileInDir для поиска в директории. Return, так как ищем первое упоминание.
 // если найден файл, то выйти из функции. Если не найден, то выведет сообщение.
-void findFile(const std::string &fileName) {
+void findFileInSystem(const std::string &fileName, bool isFirstFound) {
     for (char drive = 'a'; drive <= 'z'; ++drive) {
         std::filesystem::path currentDirectory = std::string(1, drive) + ":\\";
         if (is_directory(currentDirectory)) {
             if (findFileInDir(fileName, currentDirectory)) {
-                return;
+                if (isFirstFound) {
+                    return;
+                }
             }
         }
     }
