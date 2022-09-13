@@ -6,7 +6,7 @@ int main(int argc, const char **argv) {
         dirPath = argv[1];
     }
 
-    fileFinder("amoeba.c", dirPath);
+    fileFinder("test.txt", dirPath);
 
     return 0;
 }
