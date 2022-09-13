@@ -5,8 +5,9 @@ int main(int argc, const char **argv) {
     if (argc >= 2) {
         dirPath = argv[1];
     }
-
-    fileFinder("test.txt", dirPath);
+    //findFileInDirectory("test.txt", dirPath);
+    findFile("test.txt");
+    //fileFinder("test.txt", dirPath);
 
     return 0;
 }
