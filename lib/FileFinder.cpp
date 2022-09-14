@@ -26,7 +26,11 @@ bool findFileInSubDir(const std::string &fileName, const std::filesystem::direct
 // Иначе пробуем вызывать функцию findFileInSubDir для поиска внутри директории.
 // Если результат работы findFileInSubDir является true, то вызывается true здесь.
 // иначе сообщение, что файл не найден и следующий шаг цикла.
-bool findFileInDir(const std::string &fileName, const std::filesystem::path &dirPath) {
+bool findFileInDirectory(const std::string &fileName, const std::filesystem::path &dirPath) {
+    if (!is_directory(dirPath)) {
+        std::cout << dirPath << " Wrong directory. Searching can't be started." << std::endl;
+        return false;
+    }
     for (const auto &entry : std::filesystem::directory_iterator{dirPath}) {
         std::cout << "---Checking--- " << entry.path().string() << "\n";
         if (!is_directory(entry)) {
@@ -47,62 +51,9 @@ bool findFileInDir(const std::string &fileName, const std::filesystem::path &dir
             std::cout << "  File is not found." << "\n";
         }
     }
+    std::cout << "File is not found in this directory." << "\n";
     return false;
 }
-
-//----------------------------------------------------------------------//
-//Функция для поиска файла в выбранной стартовой директории. на вход имя и путь где искать
-//Проверяет правильность пути и перебирает диски. поиском занимается findFileInDir, которая вызывается изнутри.
-void fileFinder(const std::string &fileName, std::filesystem::path &startDirPath) {
-    int offset = 'a' - 'A';
-//Если первый символ строки большая буква диска (D:/), то заменить ее на маленькую за счет оффсета.
-    if (startDirPath.string()[0] >= 'A' && startDirPath.string()[0] <= 'Z') {
-        std::string p = startDirPath.string();
-        p.front() = startDirPath.string()[0] + offset;
-        startDirPath = p;
-    }
-//Если зашедший в функцию путь не является директорией, то выдать сообщение и присвоить диск с:/ как стартовую директорию
-    if (!is_directory(startDirPath)) {
-        std::cout << startDirPath << " is invalid path." << std::endl;
-        startDirPath = "c:\\";
-        std::cout << "Default directory is c:\\" << std::endl;
-    }
-//Если функция findFileInDir нашла файл, то выйти из функции
-    if (findFileInDir(fileName, startDirPath)) {
-        return;
-    }
-//Перебор дисков по алфавиту. Создание формирование новой строки формата пути "[drive]:\";
-//Если диск равен текущему вошедшему в функцию, то выбрать следующий по списку.
-//TODO если выбрать диск следующий после с, то диск с будет пропушен в переборе
-    for (char drive = 'd'; drive <= 'z'; ++drive) {
-        std::filesystem::path nextDir = std::string(1, drive) + ":\\";
-        if (drive == startDirPath.string()[0]) {
-            nextDir = std::string(1, ++drive) + ":\\";
-        }
-//Проверка если это директория, не вышли за диск "z:\", то вызвать функцию findFileInDir для поиска в директории.
-// если найден файл, то выйти из функции. Если не найден, то выведет сообщение, что не найден файл.
-        if (is_directory(nextDir)) {
-            if (findFileInDir(fileName, nextDir)) {
-                return;
-            }
-        }
-    }
-    std::cout << "File is not found." << "\n";
-}
-
-//----------------------------------------------------------------------//
-//Функция для поиска файла в выбранной стартовой директории. На вход имя и путь где искать
-//Проверяет правильность пути. Поиском занимается findFileInDir, которая вызывается изнутри.
-void findFileInDirectory(const std::string &fileName, std::filesystem::path &startDirPath) {
-    if (!is_directory(startDirPath)) {
-        std::cout << startDirPath << " Wrong directory. Searching can't be started." << std::endl;
-    } else {
-        if (!findFileInDir(fileName, startDirPath)) {
-            std::cout << "File is not found in this directory." << "\n";
-        }
-    }
-}
-
 //----------------------------------------------------------------------//
 //Функция для поиска файла в системе. на вход имя файла.
 //Проверяет правильность пути и перебирает диски. поиском занимается findFileInDir, которая вызывается изнутри.
@@ -115,7 +66,7 @@ void findFileInSystem(const std::string &fileName, bool isFirstFound) {
     for (char drive = 'a'; drive <= 'z'; ++drive) {
         std::filesystem::path currentDirectory = std::string(1, drive) + ":\\";
         if (is_directory(currentDirectory)) {
-            if (findFileInDir(fileName, currentDirectory)) {
+            if (findFileInDirectory(fileName, currentDirectory)) {
                 if (isFirstFound) {
                     return;
                 }
@@ -124,3 +75,108 @@ void findFileInSystem(const std::string &fileName, bool isFirstFound) {
     }
     std::cout << "File is not found." << "\n";
 }
+
+bool FileFinder::findFileInSubDirectory(const std::filesystem::directory_entry& directory) {
+    bool status = false;
+
+    for (const auto &entry : std::filesystem::recursive_directory_iterator{directory,std::filesystem::directory_options::skip_permission_denied}) {
+        if (entry.path().filename() == this->fileName) {
+            std::filesystem::path p = entry.path();
+            this->filePaths->push_back(p.make_preferred().string());
+            status = true;
+            if (this->isFirstFound) {
+                return status;
+            }
+        }
+    }
+    return status;
+}
+
+bool FileFinder::findFileInCurrentDirectory(const std::string &inFileName, const std::filesystem::path &directoryPath, bool onlyFirstFound) {
+    this->fileName = inFileName;
+    this->isFirstFound = onlyFirstFound;
+    bool status = false;
+
+    if (!this->filePaths->empty()) {
+        this->filePaths->clear();
+        this->filePaths->shrink_to_fit();
+    }
+    if (!is_directory(directoryPath)) {
+        std::cout << directoryPath << " Wrong directory. Searching can't be started." << std::endl;
+        return status;
+    }
+    for (const auto &entry : std::filesystem::directory_iterator{directoryPath}) {
+        std::cout << "Checking---> " << entry.path().string() << "\n";
+        if (!is_directory(entry)) {
+            if (entry.path().filename() == inFileName) {
+                std::filesystem::path p = entry.path();
+                this->filePaths->push_back(p.make_preferred().string());
+                status = true;
+                if (onlyFirstFound) {
+                    return status;
+                }
+            }
+        } else {
+            try {
+                if (this->findFileInSubDirectory(entry)) {
+                    status = true;
+                    if (onlyFirstFound) {
+                        return status;
+                    }
+                }
+            } catch (const std::exception &) {
+                std::cout << "Directory access error!!!" << "\n";
+            }
+        }
+    }
+    return status;
+}
+
+bool FileFinder::findFileInSystem(const std::string &inFileName, bool onlyFirstFound) {
+    bool status = false;
+
+    for (char drive = 'a'; drive <= 'z'; ++drive) {
+        std::filesystem::path currentDirectory = std::string(1, drive) + ":\\";
+        if (is_directory(currentDirectory)) {
+            if (this->findFileInCurrentDirectory(inFileName, currentDirectory, onlyFirstFound)) {
+                status = true;
+                if (onlyFirstFound) {
+                    return status;
+                }
+            }
+        }
+    }
+    return status;
+}
+
+FileFinder::FileFinder() {
+    this->isFirstFound = true;
+    this->fileName = std::string();
+    this->filePaths = new std::vector<std::string>();
+}
+
+FileFinder::~FileFinder() {
+    delete this->filePaths;
+}
+
+void FileFinder::printPaths() {
+    if (!this->filePaths->empty()) {
+        if (this->isFirstFound) {
+                std::cout << "File "<< this->fileName <<" path is: " << std::endl;
+                std::cout << this->filePaths->front() << std::endl;
+        } else {
+            std::cout << "File "<< this->fileName <<" have next paths: " << std::endl;
+            for (const auto& it: *this->filePaths) {
+                std::cout << it << std::endl;
+            }
+        }
+    } else {
+        std::cout <<"File "<< this->fileName <<" is not found." << std::endl;
+    }
+}
+
+std::vector<std::string>* FileFinder::getFilePath() const {
+    return this->filePaths;
+}
+
+
