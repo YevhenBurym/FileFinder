@@ -24,11 +24,10 @@ bool FileFinder::findFileInCurrentDirectory(const std::string &inFileName, const
     this->isFirstFound = onlyFirstFound;
     bool status = false;
 
-    if (!this->filePaths->empty() && !this->isSearchInSystem) {
+    if (!this->filePaths->empty()) {
         this->filePaths->clear();
         this->filePaths->shrink_to_fit();
     }
-
     if (!is_directory(directoryPath)) {
         std::cout << directoryPath << " Wrong directory. Searching can't be started." << std::endl;
         return status;
@@ -62,13 +61,7 @@ bool FileFinder::findFileInCurrentDirectory(const std::string &inFileName, const
 }
 
 bool FileFinder::findFileInSystem(const std::string &inFileName, bool onlyFirstFound) {
-    this->isSearchInSystem = true;
     bool status = false;
-
-    if (!this->filePaths->empty()) {
-        this->filePaths->clear();
-        this->filePaths->shrink_to_fit();
-    }
 
     for (char drive = 'a'; drive <= 'z'; ++drive) {
         std::filesystem::path currentDirectory = std::string(1, drive) + ":\\";
@@ -76,18 +69,15 @@ bool FileFinder::findFileInSystem(const std::string &inFileName, bool onlyFirstF
             if (this->findFileInCurrentDirectory(inFileName, currentDirectory, onlyFirstFound)) {
                 status = true;
                 if (onlyFirstFound) {
-                    this->isSearchInSystem = false;
                     return status;
                 }
             }
         }
     }
-    this->isSearchInSystem = false;
     return status;
 }
 
 FileFinder::FileFinder() {
-    this->isSearchInSystem = false;
     this->isFirstFound = true;
     this->fileName = std::string();
     this->filePaths = new std::vector<std::string>();
