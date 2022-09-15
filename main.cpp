@@ -6,14 +6,9 @@ int main(int argc, const char **argv) {
         dirPath = argv[1];
     }
     FileFinder finder = FileFinder();
-    //finder.findFileInDirectory("test.txt", "d:\\");
-    //finder.findFileInDirectory("testFile.txt", "d:\\",true);
-    //finder.printPaths();
-    finder.findFileInSystem("test.txt",false);
+    //finder.findFileInSystem("testFile.txt",false);
+    finder.findFileInCurrentDirectory("testFile.txt", "d:\\");
     finder.printPaths();
-    //findFileInDirectory("test.txt", "c:\\");
-    //findFileInSystem("test.txt",false);
-    //fileFinder("test.txt", dirPath);
 
     return 0;
 }
