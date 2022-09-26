@@ -5,21 +5,15 @@
 #include <vector>
 
 #include <thread>
-#include <future>
 #include <atomic>
+#include <mutex>
 
 class JoinThreads {
 private:
     std::vector<std::thread> &threads;
 public:
-    explicit JoinThreads(std::vector<std::thread> &threads) : threads(threads) {}
-
-    ~JoinThreads() {
-        for (auto &thread : threads) {
-            if (thread.joinable())
-                thread.join();
-        }
-    }
+    explicit JoinThreads(std::vector<std::thread> &threads);
+    ~JoinThreads();
 };
 
 class FileFinder {
@@ -28,21 +22,15 @@ private:
     std::vector<std::string> *filePaths;
     bool isFirstFound;
     bool isSearchInSystem;
-
-    bool findFileInSubDirectory(const std::filesystem::directory_entry &directory);
-    std::string findFileInSubDirectoryPar(std::vector<std::string>& dirVector, std::string& match);
+    bool findInSubDirectories(std::vector<std::string> &subDirectories);
+    void findInDirectoriesRange(std::vector<std::string>::iterator begin, std::vector<std::string>::iterator end,
+                                std::atomic<bool> &done, std::mutex &mtx);
 public:
     FileFinder();
-
     ~FileFinder();
-
-    bool findFileInCurrentDirectory(const std::string &inFileName, const std::filesystem::path &directoryPath,
-                                    bool onlyFirstFound = true);
-    bool findFileInCurrentDirectoryPar(const std::string &inFileName, const std::filesystem::path &directoryPath,
-                                    bool onlyFirstFound = true);
-    bool findFileInSystem(const std::string &inFileName, bool onlyFirstFound = true);
-
+    bool findInDirectory(const std::string &inFileName, const std::filesystem::path &directoryPath,
+                         bool onlyFirstFound = true);
+    bool findInSystem(const std::string &inFileName, bool onlyFirstFound = true);
     void printPaths();
-
-    std::vector<std::string> *getFilePath() const;
+    std::vector<std::string> *getPaths() const;
 };
