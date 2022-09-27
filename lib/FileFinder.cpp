@@ -98,6 +98,7 @@ bool FileFinder::findInDirectory(const std::string &inFileName, const std::files
             subDirectories.push_back(entry.path().string());
         }
     }
+    std::cout <<"Searching..." << std::endl;
     bool status = this->findInSubDirectories(subDirectories);
 
     return status;
@@ -136,9 +137,9 @@ FileFinder::~FileFinder() {
 void FileFinder::printPaths() {
     if (!this->filePaths->empty()) {
         if (this->isFirstFound) {
-            std::cout << "File " << this->fileName << " path is: " << "\t" << this->filePaths->front() << std::endl;
+            std::cout << "File path is: " << "\t" << this->filePaths->front() << std::endl;
         } else {
-            std::cout << "File " << this->fileName << " have next paths: " << std::endl;
+            std::cout << "File have next paths: " << std::endl;
             for (const auto &it: *this->filePaths) {
                 std::cout << "\t" << it << std::endl;
             }
