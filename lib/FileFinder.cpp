@@ -23,7 +23,9 @@ FileFinder::findInDirectoriesRange(std::vector<std::string>::iterator begin, std
 
                     mtx.lock();
                     this->filePaths->push_back(p.make_preferred().string());
-                    std::cout << p.make_preferred().string() << std::endl;
+                    if (!this->isFirstFound) {
+                        std::cout << p.make_preferred().string() << std::endl;
+                    }
                     mtx.unlock();
 
                     if (this->isFirstFound) {
