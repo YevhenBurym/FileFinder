@@ -23,6 +23,7 @@ FileFinder::findInDirectoriesRange(std::vector<std::string>::iterator begin, std
 
                     mtx.lock();
                     this->filePaths->push_back(p.make_preferred().string());
+                    std::cout << p.make_preferred().string() << std::endl;
                     mtx.unlock();
 
                     if (this->isFirstFound) {
@@ -139,7 +140,7 @@ void FileFinder::printPaths() {
         if (this->isFirstFound) {
             std::cout << "File path is: " << "\t" << this->filePaths->front() << std::endl;
         } else {
-            std::cout << "File have next paths: " << std::endl;
+            std::cout << std::endl << "File have next paths: " << std::endl;
             for (const auto &it: *this->filePaths) {
                 std::cout << "\t" << it << std::endl;
             }
