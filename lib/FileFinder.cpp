@@ -98,7 +98,7 @@ bool FileFinder::findInDirectory(const std::string &inFileName, const std::files
             subDirectories.push_back(entry.path().string());
         }
     }
-    std::cout <<"Searching..." << std::endl;
+    std::cout <<"Searching in "<< directoryPath.string() <<"..." << std::endl;
     bool status = this->findInSubDirectories(subDirectories);
 
     return status;
