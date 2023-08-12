@@ -47,5 +47,8 @@ int main(int argc, const char **argv) {
         std::cout << "Example if you want to search in the directory for the first match: FileFinder.exe <file name> <directory path>" << std::endl;
         std::cout << "Add the -all parameter in the end to search for all matches" << std::endl;
     }
+    std::cout << "Press any key to exit..."<< std::endl;
+    getchar();
+
     return 0;
 }
